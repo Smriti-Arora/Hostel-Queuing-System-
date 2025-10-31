@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student List</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.bundle.min.js"></script>
+    <script src="https://unpkg.com/@zxing/library@latest"></script>
+    <style>
+        #video {
+            width: 100%;
+            height: auto;
+            border: 1px solid black;
+        }
+    </style>
+</head>
+<body>
+<div class="container mt-4">
+    <h2 class="text-center">Student List</h2>
+    
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>University Roll No</th>
+                <th>Name</th>
+                <th>Father's Name</th>
+                <th>Father's Phone No</th>
+                <th>Phone No</th>
+                <th>Room No</th>
+                <th>Room Type</th>
+                <th>Hostel Type</th>
+                <th>Branch</th>
+                <th>State</th>
+                <th>City</th>
+                <th>Address</th>
+                <th></th>
+                <th>Actions</th>
+                <th>QR Code</th>
+                
+            </tr>
+        </thead>
+        <tbody>
+            {% for student in students %}
+                <tr>
+                    <td>{{ student.uni_roll_no }}</td>
+                    <td>{{ student.name }}</td>
+                    <td>{{ student.father_name }}</td>
+                    <td>{{ student.father_phone_no }}</td>
+                    <td>{{ student.phone_no }}</td>
+                    <td>{{ student.room_no }}</td>
+                    <td>{{ student.room_type }}</td>
+                    <td>{{ student.hostel_type }}</td>
+                    <td>{{ student.branch }}</td>
+                    <td>{{ student.state }}</td>
+                    <td>{{ student.city }}</td>
+                    <td>{{ student.address }}</td>
+                    <td>
+                        <!-- Trigger Regenerate QR Code Modal -->
+                        <button type="button" class="btn btn-warning" data-toggle="modal" data-target="#generateQrModal" data-id="{{ student.uni_roll_no }}">
+                            Regenerate QR Code
+                        </button>
+                    </td>
+                    <td>
+                        <a href="{% url 'update_student' student.uni_roll_no %}" class="btn btn-warning">Update</a>
+                        <button type="button" class="btn btn-danger btn-sm" data-toggle="modal" data-target="#confirmDeleteModal" data-student-id="{{ student.uni_roll_no }}" data-student-name="{{ student.name }}">Delete</button>
+                        <a href="{% url 'student_detail' student.uni_roll_no %}" class="btn btn-info btn-sm">View Details</a>  
+                    </td>
+                    <td>
+                        {% if student.qr_code %}
+                            <img src="{{ student.qr_code.url }}" alt="QR Code" style="width: 100px; height: 100px;" />
+                        {% else %}
+                            No QR Code
+                        {% endif %}
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <a href="{% url 'register_student' %}" class="btn btn-primary">Register New Student</a> 
+    <button class="btn btn-success" onclick="openQrScanner()">Scan QR Code</button>
+ <!-- Mark Attendance Button -->
+ <a href="{% url 'scan_qr' %}" class="btn btn-info">Mark Attendance</a>
+
+ <!-- Attendance Overview Button -->
+ <a href="{% url 'attendance_overview' %}" class="btn btn-warning">Attendance Overview</a>
+
+ <!-- Scan QR for Mess Button -->
+ <a href="{% url 'scan_qr_for_mess' %}" class="btn btn-secondary">Scan QR for Mess</a>
+
+ <!-- Mess Entry List Button -->
+ <a href="{% url 'mess_entry_list' %}" class="btn btn-dark">Mess Entry List</a>
+ <a href="{% url 'vacant_rooms' %}" class="btn btn-dark">Vacant Rooms</a>
+  
+    
+    
+</div>
+
+<!-- QR Scanner Modal -->
+<div class="modal fade" id="qrScannerModal" tabindex="-1" role="dialog" aria-labelledby="qrScannerModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="qrScannerModalLabel">QR Code Scanner</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <!-- Video element to display the webcam stream -->
+                <video id="video" playsinline autoplay></video>
+                <div id="qrResultMessage" style="margin-top: 20px;"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Confirm Deletion Modal -->
+<div class="modal fade" id="confirmDeleteModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Confirm Deletion</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to delete <strong id="studentName"></strong>?</p>
+            </div>
+            <div class="modal-footer">
+                <form id="deleteForm" method="post" action="">
+                    {% csrf_token %}
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-danger">Delete</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- Generate QR Code Modal -->
+<div class="modal fade" id="generateQrModal" tabindex="-1" role="dialog" aria-labelledby="generateQrModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="generateQrModalLabel">Regenerate QR Code</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to generate a QR code for this student?</p>
+                <input type="hidden" id="studentId" value="">  <!-- Hidden field to store student ID -->
+                <div id="qrCodeDisplay" style="display: none;"></div>
+                <div id="qrCodeMessage"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="generateQRButton">Generate QR Code</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Triggering the modal and setting student ID
+    $('#generateQrModal').on('show.bs.modal', function (event) {
+        var button = $(event.relatedTarget);  // Button that triggered the modal
+        var studentId = button.data('id');  // Extract student ID from data-id attribute
+        $(this).find('#studentId').val(studentId);  // Set student ID in the hidden field
+        $('#qrCodeDisplay').hide();  // Hide previous QR code if any
+        $('#qrCodeMessage').text('');  // Reset message
+    });
+
+    // Handle QR Code generation
+    $('#generateQRButton').click(function() {
+        var studentId = $('#studentId').val();  // Get student ID from hidden input
+        
+        $.ajax({
+            url: `/generate_qr_code/${studentId}/`,  // Adjust URL pattern if necessary
+            method: 'POST',
+            data: {
+                'csrfmiddlewaretoken': "{{ csrf_token }}",  // Add CSRF token for POST request
+            },
+            success: function (response) {
+                if (response.success) {
+                    var qrCodeImage = `<img src="${response.qr_code}" alt="QR Code" style="width: 100px; height: 100px;" />`;
+                    $('#qrCodeDisplay').html(qrCodeImage).show();
+                    $('#qrCodeMessage').text('QR code generated successfully!').css('color', 'green');
+                } else {
+                    $('#qrCodeMessage').text('Failed to generate QR code. Please try again.').css('color', 'red');
+                }
+            },
+            error: function () {
+                $('#qrCodeMessage').text('Error generating QR code. Please try again later.').css('color', 'red');
+            }
+        });
+    });
+
+    // QR scanner function to open modal and start video stream
+    function openQrScanner() {
+        var modal = $('#qrScannerModal');
+        modal.modal('show');
+        
+        // Ensure ZXing's BrowserQRCodeReader is initialized
+        var codeReader = new ZXing.BrowserQRCodeReader();
+
+        // Request video devices and access the first one
+        navigator.mediaDevices.getUserMedia({ video: true })
+            .then(function (stream) {
+                const videoElement = document.getElementById('video');
+                videoElement.srcObject = stream; // Set the video stream to the video element
+                videoElement.play(); // Start playing the video stream
+
+                // Start scanning the QR code from the video stream
+                codeReader.decodeFromVideoDevice(null, 'video', (result, err) => {
+                    if (result) {
+                        document.getElementById('qrResultMessage').textContent = 'QR Code detected: ' + result.text;
+                        codeReader.reset(); // Stop scanning after a successful scan
+                    }
+                    if (err && !(err instanceof ZXing.NotFoundException)) {
+                        console.error(err);
+                    }
+                });
+            })
+            .catch(function (err) {
+                console.error('Error accessing webcam: ', err);
+                alert('Could not access webcam. Please make sure your browser has permissions enabled.');
+            });
+    }
+</script>
+</body>
+</html>

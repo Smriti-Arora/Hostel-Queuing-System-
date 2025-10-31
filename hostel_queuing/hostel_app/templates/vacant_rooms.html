@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vacant Rooms</title>
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse; /* Ensures borders are combined between cells */
+        }
+        th, td {
+            border: 1px solid #000; /* Adds border to the table cells */
+            padding: 8px;
+            text-align: center;
+        }
+        th {
+            background-color: #f2f2f2; /* Adds background color to header cells */
+        }
+        tr:nth-child(even) {
+            background-color: #f9f9f9; /* Adds zebra striping to rows */
+        }
+        tr:hover {
+            background-color: #ddd; /* Highlights row on hover */
+        }
+    </style>
+</head>
+<body>
+    <h1>Vacant Rooms</h1>
+    <table>
+        <thead>
+            <tr>
+                <th>Room Type</th>
+                <th>Vacant Rooms</th>
+                <th>Vacant Spaces</th>
+                <th>Room Numbers</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>Single</td>
+                <td>{{ vacant_rooms.single_vacant }}</td>
+                <td>{{ vacant_rooms.single_vacant_space }}</td>
+                <td>{{ vacant_rooms.single_room_numbers|join:", " }}</td>
+            </tr>
+            <tr>
+                <td>Double</td>
+                <td>{{ vacant_rooms.double_vacant }}</td>
+                <td>{{ vacant_rooms.double_vacant_space }}</td>
+                <td>{{ vacant_rooms.double_room_numbers|join:", " }}</td>
+            </tr>
+            <tr>
+                <td>Triple</td>
+                <td>{{ vacant_rooms.triple_vacant }}</td>
+                <td>{{ vacant_rooms.triple_vacant_space }}</td>
+                <td>{{ vacant_rooms.triple_room_numbers|join:", " }}</td>
+            </tr>
+        </tbody>
+    </table>
+</body>
+</html>

@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Detail</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        body {
+            padding: 20px;
+            background-color: #f8f9fa;
+        }
+        h2 {
+            margin-bottom: 20px;
+        }
+        .qr-code {
+            margin-top: 20px;
+            text-align: center;
+        }
+        .qr-code img {
+            max-width: 200px; /* Limit QR code image size */
+            height: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Student Detail: {{ student.name }}</h2>
+        <table class="table table-bordered">
+            <tr>
+                <th>Uni Roll No</th>
+                <td>{{ student.uni_roll_no }}</td>
+            </tr>
+            <tr>
+                <th>Father's Name</th>
+                <td>{{ student.father_name }}</td>
+            </tr>
+            <tr>
+                <th>Father's Phone No</th>
+                <td>{{ student.father_phone_no }}</td>
+            </tr>
+            <tr>
+                <th>Phone No</th>
+                <td>{{ student.phone_no }}</td>
+            </tr>
+            <tr>
+                <th>Room No</th>
+                <td>{{ student.room_no }}</td>
+            </tr>
+            <tr>
+                <th>Room Type</th>
+                <td>{{ student.room_type }}</td>
+            </tr>
+            <tr>
+                <th>Hostel Type</th>
+                <td>{{ student.hostel_type }}</td>
+            </tr>
+            <tr>
+                <th>State</th>
+                <td>{{ student.state }}</td>
+            </tr>
+        </table>
+
+
+        <!-- Back to List Button -->
+        <div class="text-center">
+            <a href="{% url 'student_list' %}" class="btn btn-secondary">Back to List</a>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,69 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Attendance Overview</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.bundle.min.js"></script>
+</head>
+<body>
+    <h1>Attendance Overview for {{ today }}</h1>
+
+    <h3>Present Students</h3>
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>Uni Roll No</th>
+                <th>Name</th>
+                <th>Room No</th>  <!-- Added Room No column -->
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for student in present_students %}
+            <tr>
+                <td>{{ student.uni_roll_no }}</td>
+                <td>{{ student.name }}</td>
+                <td>{{ student.room_no }}</td>  <!-- Display Room No -->
+                <td>Present</td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="4">No present students for today.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <h3>Absent Students</h3>
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>Uni Roll No</th>
+                <th>Name</th>
+                <th>Room No</th>  <!-- Added Room No column -->
+                <th> Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for student in absent_students %}
+            <tr>
+                <td>{{ student.uni_roll_no }}</td>
+                <td>{{ student.name }}</td>
+                <td>{{ student.room_no }}</td>  <!-- Display Room No -->
+                <td>Absent</td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="4">No absent students for today.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    {% if current_time >= "22:00" %}
+    
+    {% endif %}
+</body>
+</html>

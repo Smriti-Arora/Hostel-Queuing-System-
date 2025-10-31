@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mess Entry Records</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+<body>
+    <div class="container mt-5">
+        <h1>Mess Entry Records</h1>
+
+        <!-- Display the count of students for each meal -->
+        <div class="row">
+            <div class="col-md-4">
+                <h3>Breakfast Attendance</h3>
+                <p>Total Students: {{ breakfast_count }}</p> <!-- Display Breakfast Count -->
+                <table class="table table-bordered">
+                    <thead>
+                        <tr>
+                            <th>Uni Roll No</th>
+                            <th>Date</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for entry in meal_entries %}
+                            {% if entry.meal == "breakfast" %}
+                            <tr>
+                                <td>{{ entry.uni_roll_no }}</td>
+                                <td>{{ entry.date }}</td>
+                            </tr>
+                            {% endif %}
+                        {% empty %}
+                            <tr>
+                                <td colspan="2">No breakfast records found.</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="col-md-4">
+                <h3>Lunch Attendance</h3>
+                <p>Total Students: {{ lunch_count }}</p> <!-- Display Lunch Count -->
+                <table class="table table-bordered">
+                    <thead>
+                        <tr>
+                            <th>Uni Roll No</th>
+                            <th>Date</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for entry in meal_entries %}
+                            {% if entry.meal == "lunch" %}
+                            <tr>
+                                <td>{{ entry.uni_roll_no }}</td>
+                                <td>{{ entry.date }}</td>
+                            </tr>
+                            {% endif %}
+                        {% empty %}
+                            <tr>
+                                <td colspan="2">No lunch records found.</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="col-md-4">
+                <h3>Dinner Attendance</h3>
+                <p>Total Students: {{ dinner_count }}</p> <!-- Display Dinner Count -->
+                <table class="table table-bordered">
+                    <thead>
+                        <tr>
+                            <th>Uni Roll No</th>
+                            <th>Date</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for entry in meal_entries %}
+                            {% if entry.meal == "dinner" %}
+                            <tr>
+                                <td>{{ entry.uni_roll_no }}</td>
+                                <td>{{ entry.date }}</td>
+                            </tr>
+                            {% endif %}
+                        {% empty %}
+                            <tr>
+                                <td colspan="2">No dinner records found.</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
