@@ -25,7 +25,7 @@ from django.utils import timezone
 from django.core.files import File
 from django.utils.timezone import now
 from django.http import Http404
-import pyzbar.pyzbar as pyzbar
+
 from datetime import date
 from .models import MealEntry
 from datetime import datetime
