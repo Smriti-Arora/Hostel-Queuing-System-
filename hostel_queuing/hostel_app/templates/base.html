@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}HostelQueue{% endblock %}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&family=Syne:wght@600;700;800&display=swap" rel="stylesheet">
+  {% load static %}
+  <link rel="stylesheet" href="{% static 'css/app.css' %}">
+  {% block extra_head %}{% endblock %}
+</head>
+<body>
+  <div class="app-shell">
+    {% if user.is_authenticated %}
+    <header class="topbar">
+      <div class="topbar-inner">
+        <a class="brand" href="{% url role_home %}">Hostel<span>Queue</span></a>
+        <nav class="nav-links">
+          {% if is_admin_user %}
+            <a href="{% url 'student_list' %}">Students</a>
+            <a href="{% url 'register_student' %}">Register</a>
+            <a href="{% url 'vacant_rooms' %}">Rooms</a>
+            <a href="{% url 'hostel_settings' %}">Settings</a>
+            <a href="{% url 'manage_staff' %}">Staff</a>
+          {% endif %}
+          {% if is_gate_user %}
+            <a href="{% url 'scan_qr' %}">Gate Scan</a>
+            <a href="{% url 'attendance_overview' %}">Gate Logs</a>
+          {% endif %}
+          {% if is_mess_user %}
+            <a href="{% url 'scan_qr_for_mess' %}">Mess Scan</a>
+            <a href="{% url 'mess_entry_list' %}">Mess Logs</a>
+          {% endif %}
+        </nav>
+        <div class="user-chip">
+          <span>{{ user.username }}{% if user_role %} · {{ user_role }}{% endif %}</span>
+          <form method="post" action="{% url 'logout' %}">
+            {% csrf_token %}
+            <button class="btn btn-ghost btn-sm" type="submit">Sign out</button>
+          </form>
+        </div>
+      </div>
+    </header>
+    {% endif %}
+
+    <main class="main">
+      {% if messages %}
+      <div class="messages">
+        {% for message in messages %}
+          <div class="alert alert-{{ message.tags|default:'info' }}">{{ message }}</div>
+        {% endfor %}
+      </div>
+      {% endif %}
+      {% block content %}{% endblock %}
+    </main>
+  </div>
+  {% block extra_js %}{% endblock %}
+</body>
+</html>

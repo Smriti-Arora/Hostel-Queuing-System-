@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+{% block title %}Staff accounts · HostelQueue{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1>Staff accounts</h1>
+    <p>Create Gate Staff and Mess Staff logins. They can only access their scan page and logs.</p>
+  </div>
+</div>
+
+<div class="two-col">
+  <div class="panel">
+    <h2 style="font-family:var(--font-display);margin-top:0;font-size:1.2rem">Create staff user</h2>
+    <form method="post" novalidate>
+      {% csrf_token %}
+      {% if form.non_field_errors %}
+        <div class="alert alert-error">{{ form.non_field_errors }}</div>
+      {% endif %}
+      {% for field in form %}
+      <div class="form-field" style="margin-bottom:0.9rem">
+        <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+        {{ field }}
+        {{ field.errors }}
+      </div>
+      {% endfor %}
+      <button class="btn btn-primary" type="submit">Create account</button>
+    </form>
+  </div>
+
+  <div class="panel">
+    <h2 style="font-family:var(--font-display);margin-top:0;font-size:1.2rem">Access rules</h2>
+    <div class="kv"><dt>Super Admin</dt><dd>Full access + create staff</dd></div>
+    <div class="kv"><dt>Gate Staff</dt><dd>Gate scan + attendance logs</dd></div>
+    <div class="kv"><dt>Mess Staff</dt><dd>Mess scan + mess logs</dd></div>
+  </div>
+</div>
+
+<div class="panel" style="margin-top:1rem">
+  <h2 style="font-family:var(--font-display);margin-top:0;font-size:1.2rem">Existing staff</h2>
+  {% if staff_users %}
+  <div class="table-wrap">
+    <table class="data">
+      <thead>
+        <tr>
+          <th>Username</th>
+          <th>Role</th>
+          <th>Status</th>
+          <th>Created</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for profile in staff_users %}
+        <tr>
+          <td>{{ profile.user.username }}</td>
+          <td>{{ profile.get_role_display }}</td>
+          <td>{% if profile.user.is_active %}Active{% else %}Disabled{% endif %}</td>
+          <td>{{ profile.created_at|date:"d M Y" }}</td>
+          <td>
+            <form method="post" action="{% url 'toggle_staff_active' profile.user_id %}">
+              {% csrf_token %}
+              <button class="btn btn-sm {% if profile.user.is_active %}btn-warn{% else %}btn-primary{% endif %}" type="submit">
+                {% if profile.user.is_active %}Disable{% else %}Enable{% endif %}
+              </button>
+            </form>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="empty">No gate/mess staff yet. Create the first account above.</div>
+  {% endif %}
+</div>
+{% endblock %}

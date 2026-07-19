@@ -1,69 +1,54 @@
-{% load static %}
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Attendance Overview</title>
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.bundle.min.js"></script>
-</head>
-<body>
-    <h1>Attendance Overview for {{ today }}</h1>
+{% extends "base.html" %}
+{% block title %}Attendance · HostelQueue{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1>Attendance overview</h1>
+    <p>Status for {{ today }} · {{ current_time }}</p>
+  </div>
+  <a class="btn btn-primary" href="{% url 'scan_qr' %}">Open gate scan</a>
+</div>
 
-    <h3>Present Students</h3>
-    <table class="table table-bordered">
-        <thead>
-            <tr>
-                <th>Uni Roll No</th>
-                <th>Name</th>
-                <th>Room No</th>  <!-- Added Room No column -->
-                <th>Status</th>
-            </tr>
-        </thead>
+<div class="stats">
+  <div class="stat"><strong>{{ present_students|length }}</strong><span>Present</span></div>
+  <div class="stat"><strong>{{ absent_students|length }}</strong><span>Absent</span></div>
+  <div class="stat"><strong>{{ total_students }}</strong><span>Total students</span></div>
+</div>
+
+<div class="two-col">
+  <div class="panel">
+    <h2 style="font-family:var(--font-display);margin-top:0;font-size:1.25rem">Present</h2>
+    {% if present_students %}
+    <div class="table-wrap">
+      <table class="data">
+        <thead><tr><th>Roll</th><th>Name</th><th>Room</th></tr></thead>
         <tbody>
-            {% for student in present_students %}
-            <tr>
-                <td>{{ student.uni_roll_no }}</td>
-                <td>{{ student.name }}</td>
-                <td>{{ student.room_no }}</td>  <!-- Display Room No -->
-                <td>Present</td>
-            </tr>
-            {% empty %}
-            <tr>
-                <td colspan="4">No present students for today.</td>
-            </tr>
-            {% endfor %}
+          {% for s in present_students %}
+          <tr><td>{{ s.uni_roll_no }}</td><td>{{ s.name }}</td><td>{{ s.room_no }}</td></tr>
+          {% endfor %}
         </tbody>
-    </table>
-
-    <h3>Absent Students</h3>
-    <table class="table table-bordered">
-        <thead>
-            <tr>
-                <th>Uni Roll No</th>
-                <th>Name</th>
-                <th>Room No</th>  <!-- Added Room No column -->
-                <th> Status</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for student in absent_students %}
-            <tr>
-                <td>{{ student.uni_roll_no }}</td>
-                <td>{{ student.name }}</td>
-                <td>{{ student.room_no }}</td>  <!-- Display Room No -->
-                <td>Absent</td>
-            </tr>
-            {% empty %}
-            <tr>
-                <td colspan="4">No absent students for today.</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-
-    {% if current_time >= "22:00" %}
-    
+      </table>
+    </div>
+    {% else %}
+    <div class="empty">No one marked present yet.</div>
     {% endif %}
-</body>
-</html>
+  </div>
+  <div class="panel">
+    <h2 style="font-family:var(--font-display);margin-top:0;font-size:1.25rem">Absent</h2>
+    {% if absent_students %}
+    <div class="table-wrap">
+      <table class="data">
+        <thead><tr><th>Roll</th><th>Name</th><th>Room</th></tr></thead>
+        <tbody>
+          {% for s in absent_students %}
+          <tr><td>{{ s.uni_roll_no }}</td><td>{{ s.name }}</td><td>{{ s.room_no }}</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <div class="empty">Everyone is present.</div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

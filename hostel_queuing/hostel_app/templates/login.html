@@ -1,79 +1,27 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Student List</title>
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.bundle.min.js"></script>
-    <script src="https://unpkg.com/@zxing/library@latest"></script>
-    <style>
-        body{
-            font-family: Arial, Helvetica, sans-serif;
-            background-color: white;
-        }
-        button{
-            background-color: #4CAF50;
-            width: 25%;
-            padding: 15px;
-            color: black;
-            border: none;
-            float: center;
-            font-size: 15px;
-        }
-        label{
-            font-size: 20px;
-        }
-        form{
-            border: 3px solid #f1f1f1;
-        }
-        input[type=email],input[type=password]{
-            width: 50%;
-            font-size: 15px;
-            margin: 8px 0px;
-            padding: 12px 20px;
-            display: inline-block;
-            border: 2px solid green;
-            box-sizing: border-box;
-        }
-        button:hover{
-            opacity:0.7;
-
-        }
-        .container{
-            padding: 50px;
-            background-color: white;
-        }
-        .imgcontainer {
-            text-align: center;
-            margin: 24px 0 12px 0;
-        }
-          
-        img.avatar {
-            width: 20%;
-            border-radius: 50%;
-        }  
-    </style>
-</head>
-<body>
-    <center><h1>Login Form</h1></center>
-    <form action="{% url 'login' %}" method="post">
-        {% csrf_token %}
-        {% load static %}
-        <center><div class="container">
-            <div class="imgcontainer">
-                <img src="{% static 'avatar_img2.png' %}" alt="Avatar" class="avatar">
-            </div>
-            <label for ='username'><b>UserEmail :  </b></label>
-            <input type="text" placeholder="Enter usernamae" name="username" float="right"  required><br>  
-            <label for='password'><b>Password : </b></label>
-            <input type="password" placeholder="Enter Password" name="password" required><br>  
-            <button type="submit"><b>Login</b></button><br>     
-            Don't have accounct <a href="http://localhost:8000/signup/"> register </a>
-        </div></center>
+{% extends "base.html" %}
+{% block title %}Sign in · HostelQueue{% endblock %}
+{% block content %}
+<div class="auth-page" style="margin: -1.5rem auto -2.5rem; width: 100%; max-width: none;">
+  <div class="auth-card">
+    <h1>Hostel<span style="color: var(--accent);">Queue</span></h1>
+    <p class="lede">Sign in to manage hostel students, gate attendance, and mess entries.</p>
+    <form method="post" novalidate>
+      {% csrf_token %}
+      {% if form.non_field_errors %}
+        <div class="alert alert-error">{{ form.non_field_errors }}</div>
+      {% endif %}
+      <div class="form-field">
+        <label for="id_username">Username</label>
+        {{ form.username }}
+        {{ form.username.errors }}
+      </div>
+      <div class="form-field">
+        <label for="id_password">Password</label>
+        {{ form.password }}
+        {{ form.password.errors }}
+      </div>
+      <button class="btn btn-primary" type="submit">Sign in</button>
     </form>
-</body>
-</html>
-
-
+  </div>
+</div>
+{% endblock %}

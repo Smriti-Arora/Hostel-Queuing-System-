@@ -1,43 +1,20 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Confirm Deletion</title>
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f8f9fa; /* Light background for contrast */
-            padding: 20px; /* Padding around the body */
-        }
-        .confirmation-container {
-            max-width: 500px; /* Maximum width for the confirmation box */
-            margin: auto; /* Centering the container */
-            padding: 20px; /* Padding inside the box */
-            background-color: #fff; /* White background for the box */
-            border-radius: 5px; /* Rounded corners */
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Subtle shadow */
-        }
-        .alert {
-            margin-bottom: 20px; /* Space below alert */
-        }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <div class="confirmation-container">
-            <h2 class="text-center">Confirm Deletion</h2>
-            <div class="alert alert-warning">
-                <strong>Warning:</strong> This action cannot be undone!
-            </div>
-            <p>Are you sure you want to delete the student <strong>{{ student.name }}</strong>?</p>
-            <form method="POST">
-                {% csrf_token %}
-                <button type="submit" class="btn btn-danger">Delete</button>
-                <a href="{% url 'student_list' %}" class="btn btn-secondary">Cancel</a>
-            </form>
-        </div>
+{% extends "base.html" %}
+{% block title %}Delete student · HostelQueue{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1>Delete student</h1>
+    <p>This permanently removes the resident and their QR image.</p>
+  </div>
+</div>
+<div class="panel" style="max-width:520px">
+  <p>Are you sure you want to delete <strong>{{ student.name }}</strong> ({{ student.uni_roll_no }})?</p>
+  <form method="post">
+    {% csrf_token %}
+    <div class="actions">
+      <button class="btn btn-danger" type="submit">Yes, delete</button>
+      <a class="btn btn-secondary" href="{% url 'student_list' %}">Cancel</a>
     </div>
-</body>
-</html>
+  </form>
+</div>
+{% endblock %}

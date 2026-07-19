@@ -1,71 +1,37 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Student Detail</title>
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-    <style>
-        body {
-            padding: 20px;
-            background-color: #f8f9fa;
-        }
-        h2 {
-            margin-bottom: 20px;
-        }
-        .qr-code {
-            margin-top: 20px;
-            text-align: center;
-        }
-        .qr-code img {
-            max-width: 200px; /* Limit QR code image size */
-            height: auto;
-        }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <h2>Student Detail: {{ student.name }}</h2>
-        <table class="table table-bordered">
-            <tr>
-                <th>Uni Roll No</th>
-                <td>{{ student.uni_roll_no }}</td>
-            </tr>
-            <tr>
-                <th>Father's Name</th>
-                <td>{{ student.father_name }}</td>
-            </tr>
-            <tr>
-                <th>Father's Phone No</th>
-                <td>{{ student.father_phone_no }}</td>
-            </tr>
-            <tr>
-                <th>Phone No</th>
-                <td>{{ student.phone_no }}</td>
-            </tr>
-            <tr>
-                <th>Room No</th>
-                <td>{{ student.room_no }}</td>
-            </tr>
-            <tr>
-                <th>Room Type</th>
-                <td>{{ student.room_type }}</td>
-            </tr>
-            <tr>
-                <th>Hostel Type</th>
-                <td>{{ student.hostel_type }}</td>
-            </tr>
-            <tr>
-                <th>State</th>
-                <td>{{ student.state }}</td>
-            </tr>
-        </table>
+{% extends "base.html" %}
+{% block title %}{{ student.name }} · HostelQueue{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1>{{ student.name }}</h1>
+    <p>Roll no {{ student.uni_roll_no }} · Room {{ student.room_no }} ({{ student.room_type }})</p>
+  </div>
+  <div class="actions">
+    <a class="btn btn-secondary" href="{% url 'update_student' student.uni_roll_no %}">Edit</a>
+    <a class="btn btn-secondary" href="{% url 'student_list' %}">Back</a>
+  </div>
+</div>
 
-
-        <!-- Back to List Button -->
-        <div class="text-center">
-            <a href="{% url 'student_list' %}" class="btn btn-secondary">Back to List</a>
-        </div>
-    </div>
-</body>
-</html>
+<div class="detail-grid">
+  <div class="panel">
+    <dl>
+      <div class="kv"><dt>Father</dt><dd>{{ student.father_name }}</dd></div>
+      <div class="kv"><dt>Father phone</dt><dd>{{ student.father_phone_no }}</dd></div>
+      <div class="kv"><dt>Phone</dt><dd>{{ student.phone_no }}</dd></div>
+      <div class="kv"><dt>Hostel</dt><dd>{{ student.hostel_type }}</dd></div>
+      <div class="kv"><dt>Branch</dt><dd>{{ student.branch }}</dd></div>
+      <div class="kv"><dt>State</dt><dd>{{ student.state }}</dd></div>
+      <div class="kv"><dt>City</dt><dd>{{ student.city }}</dd></div>
+      <div class="kv"><dt>Address</dt><dd>{{ student.address }}</dd></div>
+    </dl>
+  </div>
+  <div class="panel" style="text-align:center">
+    <h3 style="font-family:var(--font-display);margin-top:0">QR Code</h3>
+    {% if student.qr_code %}
+      <img src="{% url 'student_qr_image' student.uni_roll_no %}" alt="QR code" style="width:220px;height:220px;object-fit:contain;border:1px solid var(--line);border-radius:16px;background:#fff;padding:0.75rem">
+    {% else %}
+      <p class="empty">No QR code generated yet.</p>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

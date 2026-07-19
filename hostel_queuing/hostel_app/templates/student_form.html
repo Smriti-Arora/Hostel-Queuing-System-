@@ -1,120 +1,77 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% if student %}Update{% else %}Register{% endif %} Student</title>
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 20px;
-        }
-        .form-container {
-            max-width: 600px;
-            margin: auto;
-            padding: 20px;
-            background-color: #f8f9fa;
-            border-radius: 5px;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-        }
-        button {
-            padding: 10px 15px;
-            margin-top: 10px;
-            width: 100%;
-        }
-    </style>
-</head>
-<body>
-
-<div class="container">
-    <h2 class="text-center">{% if student %}Update{% else %}Register{% endif %} Student</h2>
-
-    <form method="POST" action="{% if student %}{% url 'update_student' student.uni_roll_no %}{% else %}{% url 'register_student' %}{% endif %}">
-        {% csrf_token %}
-        <div class="form-container">
-            <!-- Display any form errors -->
-            {% if form.errors %}
-                <div class="alert alert-danger">
-                    <strong>Please fix the following errors:</strong>
-                    <ul>
-                        {% for field in form %}
-                            {% for error in field.errors %}
-                                <li>{{ error }}</li>
-                            {% endfor %}
-                        {% endfor %}
-                        {% for error in form.non_field_errors %}
-                            <li>{{ error }}</li>
-                        {% endfor %}
-                    </ul>
-                </div>
-            {% endif %}
-
-            <!-- Form fields with Bootstrap styling -->
-            <div class="form-group">
-                <label for="uni_roll_no">University Roll No:</label>
-                <input type="text" class="form-control" id="uni_roll_no" name="uni_roll_no" required>
-            </div>
-            <div class="form-group">
-                <label for="name">Name:</label>
-                {{ form.name }}  <!-- Render without as_widget -->
-            </div>
-            <div class="form-group">
-                <label for="father_name">Father's Name:</label>
-                {{ form.father_name }}  <!-- Render without as_widget -->
-            </div>
-            <div class="form-group">
-                <label for="father_phone_no">Father's Phone No:</label>
-                {{ form.father_phone_no }}  <!-- Render without as_widget -->
-            </div>
-            <div class="form-group">
-                <label for="phone_no">Phone No:</label>
-                {{ form.phone_no }}  <!-- Render without as_widget -->
-            </div>
-            <div class="form-group">
-                <label for="room_no">Room No:</label>
-                {{ form.room_no }}  <!-- Render without as_widget -->
-            </div>
-            <div class="form-group">
-                <label for="room_type">Room Type:</label>
-                {{ form.room_type }}  <!-- Render without as_widget -->
-            </div>
-            <div class="form-group">
-                <label for="hostel_type">Hostel Type:</label>
-                {{ form.hostel_type }}  <!-- Render without as_widget -->
-            </div>
-            <div class="form-group">
-                <label for="branch">Branch:</label>
-                {{ form.branch }}  <!-- Render without as_widget -->
-            </div>
-            <div class="form-group">
-                <label for="state">State:</label>
-                {{ form.state }}  <!-- Render without as_widget -->
-            </div>
-            <div class="form-group">
-                <label for="city">City:</label>
-                {{ form.city }}  <!-- Add city field -->
-            </div>
-            <div class="form-group">
-                <label for="address">Address:</label>
-                {{ form.address }}  <!-- Add address field -->
-            </div>
-
-            <!-- Add Bootstrap classes directly -->
-            <script>
-                document.querySelectorAll('.form-group input').forEach(function(input) {
-                    input.classList.add('form-control');
-                });
-            </script>
-
-            <!-- Submit Button -->
-            <button type="submit" class="btn btn-primary">{% if student %}Update{% else %}Register{% endif %} Student</button>
-        </div>
-    </form>
+{% extends "base.html" %}
+{% block title %}{{ title|default:"Student form" }} · HostelQueue{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1>{{ title|default:"Student form" }}</h1>
+    <p>Pick a room type first — only rooms with free beds for that type will appear.</p>
+  </div>
+  <a class="btn btn-secondary" href="{% url 'student_list' %}">Back to list</a>
 </div>
 
-<script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
-<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-</body>
-</html>
+<div class="panel">
+  <form method="post" enctype="multipart/form-data" novalidate id="studentForm">
+    {% csrf_token %}
+    {% if form.non_field_errors %}
+      <div class="alert alert-error">{{ form.non_field_errors }}</div>
+    {% endif %}
+    <div class="form-grid">
+      {% for field in form %}
+      <div class="form-field {% if field.name == 'address' %}full{% endif %}">
+        <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+        {{ field }}
+        {% if field.help_text %}<small style="color:var(--ink-soft)">{{ field.help_text }}</small>{% endif %}
+        {{ field.errors }}
+      </div>
+      {% endfor %}
+    </div>
+    <div class="actions" style="margin-top:1.2rem">
+      <button class="btn btn-primary" type="submit">Save student</button>
+      <a class="btn btn-ghost" href="{% url 'reset_form' %}">Reset</a>
+    </div>
+  </form>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  const roomTypeEl = document.getElementById('id_room_type');
+  const roomNoEl = document.getElementById('id_room_no');
+  const excludeRoll = '{{ student.uni_roll_no|default:"" }}';
+  const currentRoom = '{{ student.room_no|default:"" }}';
+
+  async function loadRooms() {
+    const roomType = roomTypeEl.value;
+    roomNoEl.innerHTML = '';
+    if (!roomType) {
+      roomNoEl.innerHTML = '<option value="">Select room type first</option>';
+      return;
+    }
+    roomNoEl.innerHTML = '<option value="">Loading…</option>';
+    const url = new URL('{% url "available_rooms_api" %}', window.location.origin);
+    url.searchParams.set('room_type', roomType);
+    if (excludeRoll) url.searchParams.set('exclude', excludeRoll);
+    try {
+      const res = await fetch(url, { headers: { 'Accept': 'application/json' } });
+      const data = await res.json();
+      roomNoEl.innerHTML = '<option value="">Select room number</option>';
+      (data.rooms || []).forEach((room) => {
+        const opt = document.createElement('option');
+        opt.value = room.room_no;
+        opt.textContent = room.label;
+        if (room.room_no === currentRoom) opt.selected = true;
+        roomNoEl.appendChild(opt);
+      });
+      if (!data.rooms || !data.rooms.length) {
+        roomNoEl.innerHTML = '<option value="">No free rooms for this type</option>';
+      }
+    } catch (e) {
+      roomNoEl.innerHTML = '<option value="">Could not load rooms</option>';
+    }
+  }
+
+  if (roomTypeEl) {
+    roomTypeEl.addEventListener('change', loadRooms);
+  }
+</script>
+{% endblock %}

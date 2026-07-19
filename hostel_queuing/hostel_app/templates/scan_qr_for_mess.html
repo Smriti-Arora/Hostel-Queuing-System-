@@ -1,102 +1,86 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mess Entry Records</title>
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-</head>
-<body>
-    <div class="container mt-5">
-        <h1>Mess Entry Records</h1>
+{% extends "base.html" %}
+{% block title %}Mess scan · HostelQueue{% endblock %}
+{% block extra_head %}
+<script src="https://unpkg.com/@zxing/library@0.21.3"></script>
+{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1>Mess attendance</h1>
+    <p>Breakfast 7:30–9:00 · Lunch 12:30–14:00 · Dinner 19:30–21:00 (IST)</p>
+  </div>
+  <a class="btn btn-secondary" href="{% url 'mess_entry_list' %}">View log</a>
+</div>
 
-        <!-- Display the count of students for each meal -->
-        <div class="row">
-            <!-- Breakfast Section -->
-            <div class="col-md-4">
-                <h3>Breakfast Attendance</h3>
-                <p>Total Students: {{ breakfast_count }}</p>
-                <table class="table table-bordered">
-                    <thead>
-                        <tr>
-                            <th>Uni Roll No</th>
-                            <th>Date</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for entry in meal_entries %}
-                            {% if entry.meal|lower == "breakfast" %}
-                            <tr>
-                                <td>{{ entry.uni_roll_no }}</td>
-                                <td>{{ entry.date }}</td>
-                            </tr>
-                            {% endif %}
-                        {% empty %}
-                            <tr>
-                                <td colspan="2">No breakfast records found.</td>
-                            </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
+<div class="panel scanner-stage">
+  <label class="form-field" style="max-width:280px">
+    <span>Meal</span>
+    <select id="meal" class="form-select">
+      <option value="breakfast">Breakfast</option>
+      <option value="lunch">Lunch</option>
+      <option value="dinner">Dinner</option>
+    </select>
+  </label>
+  <video id="video" class="scanner-video" muted playsinline></video>
+  <div class="actions">
+    <button class="btn btn-primary" id="startBtn" type="button">Start camera</button>
+    <button class="btn btn-ghost" id="stopBtn" type="button">Stop</button>
+  </div>
+  <div id="scanResult" class="alert alert-info" style="display:none"></div>
+</div>
+{% endblock %}
 
-            <!-- Lunch Section -->
-            <div class="col-md-4">
-                <h3>Lunch Attendance</h3>
-                <p>Total Students: {{ lunch_count }}</p>
-                <table class="table table-bordered">
-                    <thead>
-                        <tr>
-                            <th>Uni Roll No</th>
-                            <th>Date</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for entry in meal_entries %}
-                            {% if entry.meal|lower == "lunch" %}
-                            <tr>
-                                <td>{{ entry.uni_roll_no }}</td>
-                                <td>{{ entry.date }}</td>
-                            </tr>
-                            {% endif %}
-                        {% empty %}
-                            <tr>
-                                <td colspan="2">No lunch records found.</td>
-                            </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
+{% block extra_js %}
+<script>
+  const video = document.getElementById('video');
+  const resultEl = document.getElementById('scanResult');
+  const csrf = '{{ csrf_token }}';
+  let codeReader = null;
+  let controls = null;
+  let busy = false;
 
-            <!-- Dinner Section -->
-            <div class="col-md-4">
-                <h3>Dinner Attendance</h3>
-                <p>Total Students: {{ dinner_count }}</p>
+  function showResult(data, ok) {
+    resultEl.style.display = 'block';
+    resultEl.className = 'alert ' + (ok ? 'alert-success' : 'alert-error');
+    const timeLine = data.scanned_at ? `<div class="scan-time">Scanned at ${data.scanned_at}</div>` : '';
+    resultEl.innerHTML = `<strong>${data.message || 'Done'}</strong>${timeLine}`;
+  }
 
-                <table class="table table-bordered">
-                    <thead>
-                        <tr>
-                            <th>Uni Roll No</th>
-                            <th>Date</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for entry in meal_entries %}
-                            {% if entry.meal|lower == "dinner" %}
-                            <tr>
-                                <td>{{ entry.uni_roll_no }}</td>
-                                <td>{{ entry.date }}</td>
-                            </tr>
-                            {% endif %}
-                        {% empty %}
-                            <tr>
-                                <td colspan="2">No dinner records found.</td>
-                            </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </div>
-</body>
-</html>
+  async function handleScan(qrData) {
+    if (busy) return;
+    busy = true;
+    const roll = (qrData || '').split(',')[0].trim();
+    const body = new URLSearchParams();
+    body.set('uni_roll_no', roll);
+    body.set('meal', document.getElementById('meal').value);
+    try {
+      const res = await fetch('{% url "scan_qr_for_mess" %}', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+          'X-CSRFToken': csrf,
+        },
+        body,
+      });
+      const data = await res.json();
+      showResult(data, !!data.success);
+    } catch (e) {
+      showResult({ message: 'Scan request failed' }, false);
+    } finally {
+      setTimeout(() => { busy = false; }, 1500);
+    }
+  }
+
+  document.getElementById('startBtn').addEventListener('click', async () => {
+    codeReader = new ZXing.BrowserQRCodeReader();
+    controls = await codeReader.decodeFromVideoDevice(undefined, video, (result, err) => {
+      if (result) handleScan(result.getText());
+    });
+  });
+
+  document.getElementById('stopBtn').addEventListener('click', () => {
+    if (controls) controls.stop();
+    if (codeReader) codeReader.reset();
+  });
+</script>
+{% endblock %}

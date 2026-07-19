@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+{% block title %}Hostel settings · HostelQueue{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1>Hostel settings</h1>
+    <p>Configure how many rooms exist and how many students each type can hold. Room numbers are generated automatically (S01, D01, T01, F01…).</p>
+  </div>
+  <a class="btn btn-secondary" href="{% url 'vacant_rooms' %}">View vacancies</a>
+</div>
+
+<div class="panel">
+  <form method="post" novalidate>
+    {% csrf_token %}
+    {% if form.non_field_errors %}
+      <div class="alert alert-error">{{ form.non_field_errors }}</div>
+    {% endif %}
+
+    <h2 style="font-family:var(--font-display);margin:0 0 1rem;font-size:1.2rem">Room counts</h2>
+    <div class="form-grid">
+      {% for field in form %}
+        {% if 'capacity' not in field.name %}
+        <div class="form-field">
+          <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+          {{ field }}
+          {{ field.errors }}
+        </div>
+        {% endif %}
+      {% endfor %}
+    </div>
+
+    <h2 style="font-family:var(--font-display);margin:1.5rem 0 1rem;font-size:1.2rem">Capacity per room</h2>
+    <div class="form-grid">
+      {% for field in form %}
+        {% if 'capacity' in field.name %}
+        <div class="form-field">
+          <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+          {{ field }}
+          {{ field.errors }}
+        </div>
+        {% endif %}
+      {% endfor %}
+    </div>
+
+    <div class="actions" style="margin-top:1.25rem">
+      <button class="btn btn-primary" type="submit">Save settings</button>
+    </div>
+  </form>
+</div>
+
+<div class="panel">
+  <h2 style="font-family:var(--font-display);margin-top:0;font-size:1.2rem">Room number preview</h2>
+  <div class="two-col">
+    <div>
+      <strong>Single</strong> ({{ settings.single_rooms }} × {{ settings.single_capacity }})
+      <p>{% if preview.Single %}{{ preview.Single|join:", " }}{% if settings.single_rooms > 5 %}…{% endif %}{% else %}None{% endif %}</p>
+    </div>
+    <div>
+      <strong>Double</strong> ({{ settings.double_rooms }} × {{ settings.double_capacity }})
+      <p>{% if preview.Double %}{{ preview.Double|join:", " }}{% if settings.double_rooms > 5 %}…{% endif %}{% else %}None{% endif %}</p>
+    </div>
+    <div>
+      <strong>Triple</strong> ({{ settings.triple_rooms }} × {{ settings.triple_capacity }})
+      <p>{% if preview.Triple %}{{ preview.Triple|join:", " }}{% if settings.triple_rooms > 5 %}…{% endif %}{% else %}None{% endif %}</p>
+    </div>
+    <div>
+      <strong>Four sitter</strong> ({{ settings.foursitter_rooms }} × {{ settings.foursitter_capacity }})
+      <p>{% if preview.FourSitter %}{{ preview.FourSitter|join:", " }}{% if settings.foursitter_rooms > 5 %}…{% endif %}{% else %}None{% endif %}</p>
+    </div>
+  </div>
+</div>
+{% endblock %}
